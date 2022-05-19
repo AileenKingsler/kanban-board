@@ -14,7 +14,7 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/kanban-board">
       <Routes>
         <Route
           exact

@@ -23,7 +23,7 @@ function Login() {
 
         setAuthToken(token);
 
-        window.location.href = "/";
+        window.location.href = process.env.PUBLIC_URL;
       })
       .catch(error => {
         setError(error);

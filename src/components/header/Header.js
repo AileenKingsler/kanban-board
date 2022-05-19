@@ -4,7 +4,7 @@ import "./header.scss"
 function Header() {
   const logout = () => {
     localStorage.removeItem("token");
-    window.location.href = "/login";
+    window.location.href = process.env.PUBLIC_URL + "/login";
   };
 
   return (
