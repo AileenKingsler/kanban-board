@@ -1,0 +1,50 @@
+.card {
+  position: relative;
+  padding: 10px;
+  background-color: #1f1f23;
+  color: #888;
+  cursor: move;
+  user-select: none;
+
+  &__id {
+    margin: 0;
+
+    &-title {
+      color: #fff;
+    }
+  }
+
+  &__text {
+    margin: 10px 0 0;
+  }
+
+  &__delete {
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    background-color: transparent;
+    color: #666;
+    border: 0;
+    cursor: pointer;
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 1px;
+      background-color: currentColor;
+    }
+
+    &::before {
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    &::after {
+      transform: translate(-50%, -50%) rotate(-45deg);
+    }
+  }
+}

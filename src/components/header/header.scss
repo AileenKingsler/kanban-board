@@ -1,0 +1,29 @@
+.header {
+  display: flex;
+  justify-content: flex-end;
+  background-color: #303038;
+  padding: 1rem 2rem;
+  gap: 2rem;
+
+  @media (max-width: 991px) {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  &__logout {
+    background-color: #383a42;
+    border: 0;
+    font-size: 16px;
+    color: #888;
+    padding: 10px;
+    min-width: 170px;
+    cursor: pointer;
+    user-select: none;
+    transition: 0.25s;
+
+    &:hover,
+    &:focus {
+      background-color: #404048;
+    }
+  }
+}

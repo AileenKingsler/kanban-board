@@ -1,0 +1,91 @@
+.add-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+
+  &__btn {
+    background-color: transparent;
+    border: 0;
+    font-size: 16px;
+    text-align: left;
+    color: #646464;
+    padding: 10px;
+    width: 100%;
+    cursor: pointer;
+    user-select: none;
+    transition: 0.25s;
+
+    &:hover,
+    &:focus {
+      background-color: #27272d;
+    }
+  }
+
+  &__text {
+    width: 100%;
+    display: block;
+    background-color: #515051;
+    color: #888;
+    padding: 10px;
+    font-family: inherit;
+    border: 0;
+    resize: none;
+    transition: 0.25s;
+
+    &::placeholder {
+      color: #888;
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 1px #666;
+    }
+  }
+
+  &__submit {
+    background-color: #616061;
+    color: #888;
+    font-family: inherit;
+    border: 0;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: 0.25s;
+
+    &:hover {
+      background-color: #515253;
+    }
+  }
+
+  &__cancel {
+    position: relative;
+    background-color: transparent;
+    color: #888;
+    border: 0;
+    padding: 0;
+    min-width: 30px;
+    cursor: pointer;
+    transition: 0.25s;
+
+    &:hover {
+      background-color: #515253;
+    }
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 2px;
+      background-color: currentColor;
+    }
+
+    &::before {
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    &::after {
+      transform: translate(-50%, -50%) rotate(-45deg);
+    }
+  }
+}
