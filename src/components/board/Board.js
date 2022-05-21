@@ -53,6 +53,21 @@ function Board() {
       });
   };
 
+  const deleteCard = (id, row) => {
+    axios.delete(`https://trello.backend.tests.nekidaem.ru/api/v1/cards/${id}/`)
+      .then(response => {
+        const itemsCopy = new Map(items);
+        const column = itemsCopy.get(row);
+        const deleteddItemIndex = column.findIndex(card => card.id === id);
+        column.splice(deleteddItemIndex, 1);
+        setItems(itemsCopy);
+        getCards();
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+
   const handleOnDragEnd = ({ destination, source }) => {
     if (!destination) return;
 
@@ -90,7 +105,8 @@ function Board() {
                 id={id}
                 title={title}
                 items={columnItems}
-                getCards={() => getCards()}
+                getCards={getCards}
+                deleteCard={deleteCard}
               />
             )
           })}

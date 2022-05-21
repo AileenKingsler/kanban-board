@@ -4,9 +4,9 @@ import Card from "../card/Card";
 import AddCard from "../addCard/AddCard";
 import "./column.scss";
 
-function Column({ id, title, items = [], getCards }) {
+function Column({ id, title, items = [], getCards, deleteCard }) {
   const renderCards = () => {
-    return items.map(({ id, text }, index) => (
+    return items.map(({ id, row, text }, index) => (
       <Draggable key={id} draggableId={`${id}`} index={index}>
         {(provided) => (
           <li
@@ -15,7 +15,7 @@ function Column({ id, title, items = [], getCards }) {
             {...provided.draggableProps}
             {...provided.dragHandleProps}
           >
-            <Card id={id} text={text} getCards={getCards} />
+            <Card id={id} row={row} text={text} deleteCard={deleteCard} />
           </li>
         )}
       </Draggable>
