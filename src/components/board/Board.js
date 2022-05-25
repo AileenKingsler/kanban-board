@@ -10,22 +10,25 @@ function Board() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [items, setItems] = useState([]);
 
+  const setCardsToState = (data) => {
+    const cards = new Map();
+
+    data.forEach(card => {
+      if (!cards.has(card.row)) {
+        cards.set(card.row, [card]);
+      } else {
+        cards.get(card.row).push(card);
+      }
+    });
+
+    setItems(cards);
+  };
+
   const getCards = () => {
     axios.get("https://trello.backend.tests.nekidaem.ru/api/v1/cards/")
       .then(response => {
         setIsLoaded(true);
-
-        const boardMap = new Map();
-        response.data.map(card => {
-          if (!boardMap.has(card.row)) {
-            boardMap.set(card.row, [card]);
-          } else {
-            boardMap.get(card.row).push(card);
-          }
-          return [card.row, card];
-        });
-
-        setItems(boardMap);
+        setCardsToState(response.data);
       })
       .catch(error => {
         setIsLoaded(true);
@@ -37,43 +40,48 @@ function Board() {
     getCards();
   }, []);
 
-  const updateCard = (card, row, seq_num) => {
-    const cardPayload = {
-      row,
-      seq_num,
-      text: card.text,
-    };
+  const addCardToState = (row, text) => {
+    const itemsCopy = new Map(items);
+    const cardPayload = { row, text };
 
-    axios.patch(`https://trello.backend.tests.nekidaem.ru/api/v1/cards/${card.id}/`, cardPayload)
-      .then(response => {
-        getCards();
-      })
-      .catch(error => {
-        console.log(error);
-      });
+    if (!itemsCopy.has(row)) {
+      itemsCopy.set(row, [cardPayload]);
+    } else {
+      itemsCopy.get(row).push(cardPayload);
+    }
+
+    setItems(itemsCopy);
+  };
+
+  const addCard = (row, text) => {
+    addCardToState(row, text);
+
+    axios.post("https://trello.backend.tests.nekidaem.ru/api/v1/cards/", { row, text })
+      .then(response => { getCards() })
+      .catch(error => console.log(error));
+  };
+
+  const deleteCardFromState = (id, row) => {
+    const itemsCopy = new Map(items);
+
+    const column = itemsCopy.get(row);
+    const itemIndex = column.findIndex(card => card.id === id);
+    column.splice(itemIndex, 1);
+
+    setItems(itemsCopy);
   };
 
   const deleteCard = (id, row) => {
+    deleteCardFromState(id, row);
+
     axios.delete(`https://trello.backend.tests.nekidaem.ru/api/v1/cards/${id}/`)
-      .then(response => {
-        const itemsCopy = new Map(items);
-        const column = itemsCopy.get(row);
-        const deleteddItemIndex = column.findIndex(card => card.id === id);
-        column.splice(deleteddItemIndex, 1);
-        setItems(itemsCopy);
-        getCards();
-      })
-      .catch(error => {
-        console.log(error);
-      });
+      .then(response => { getCards() })
+      .catch(error => console.log(error));
   };
 
-  const handleOnDragEnd = ({ destination, source }) => {
-    if (!destination) return;
-
-    if (source.droppableId === destination.droppableId && destination.index === source.index) return;
-
+  const updateCardInState = (source, destination) => {
     const itemsCopy = new Map(items);
+
     const sourceColumn = itemsCopy.get(source.droppableId);
     const [reorderedItem] = sourceColumn.splice(source.index, 1);
     reorderedItem.row = destination.droppableId;
@@ -85,7 +93,26 @@ function Board() {
     destinationColumn.splice(destination.index, 0, reorderedItem);
 
     setItems(itemsCopy);
-    updateCard(reorderedItem, destination.droppableId, destination.index);
+  };
+
+  const updateCard = ({ id, row, seq_num, text }) => {
+    axios.patch(`https://trello.backend.tests.nekidaem.ru/api/v1/cards/${id}/`, { row, seq_num, text })
+      .then(response => { getCards() })
+      .catch(error => console.log(error));
+  };
+
+  const handleOnDragEnd = ({ source, destination, draggableId }) => {
+    if (!destination) return;
+
+    if (source.droppableId === destination.droppableId && destination.index === source.index) return;
+
+    const sourceColumn = items.get(source.droppableId);
+    const reorderedItem = sourceColumn.find(card => card.id === Number(draggableId));
+    const destinationColumn = items.get(destination.droppableId);
+    const destinationCard = destinationColumn[destination.index];
+
+    updateCardInState(source, destination);
+    updateCard({ ...reorderedItem, row: destination.droppableId, seq_num: destinationCard.seq_num });
   }
 
   const renderContent = () => {
@@ -105,7 +132,7 @@ function Board() {
                 id={id}
                 title={title}
                 items={columnItems}
-                getCards={getCards}
+                addCard={addCard}
                 deleteCard={deleteCard}
               />
             )

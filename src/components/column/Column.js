@@ -4,10 +4,10 @@ import Card from "../card/Card";
 import AddCard from "../addCard/AddCard";
 import "./column.scss";
 
-function Column({ id, title, items = [], getCards, deleteCard }) {
+function Column({ id, title, items = [], addCard, deleteCard }) {
   const renderCards = () => {
     return items.map(({ id, row, text }, index) => (
-      <Draggable key={id} draggableId={`${id}`} index={index}>
+      <Draggable key={`${id}`} draggableId={`${id}`} index={index}>
         {(provided) => (
           <li
             className="column__card"
@@ -34,7 +34,7 @@ function Column({ id, title, items = [], getCards, deleteCard }) {
             </ul>
           )}
         </Droppable>
-        <AddCard id={id} getCards={getCards} />
+        <AddCard row={`${id}`} addCard={addCard} />
       </div>
     </div>
   );
