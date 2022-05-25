@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { DragDropContext } from "react-beautiful-dnd";
 import Column from "../column/Column";
+import getSeqNum from "../../helpers/getSeqNum";
 import "./board.scss"
 
 function Board() {
@@ -108,11 +109,10 @@ function Board() {
 
     const sourceColumn = items.get(source.droppableId);
     const reorderedItem = sourceColumn.find(card => card.id === Number(draggableId));
-    const destinationColumn = items.get(destination.droppableId);
-    const destinationCard = destinationColumn[destination.index];
+    const seq_num = getSeqNum(items, destination.droppableId, destination.index);
 
     updateCardInState(source, destination);
-    updateCard({ ...reorderedItem, row: destination.droppableId, seq_num: destinationCard.seq_num });
+    updateCard({ ...reorderedItem, row: destination.droppableId, seq_num });
   }
 
   const renderContent = () => {
