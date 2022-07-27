@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { DragDropContext } from "react-beautiful-dnd";
-import Column from "../column/Column";
-import getSeqNum from "../../helpers/getSeqNum";
-import "./board.scss"
+import React, { useEffect, useState } from 'react';
+import { DragDropContext } from 'react-beautiful-dnd';
+import { API } from '../../api/api';
+import getSeqNum from '../../helpers/getSeqNum';
+import Column from '../column/Column';
+import './board.scss';
 
 function Board() {
-  const columns = ["On hold", "In progress", "Needs review", "Approved"];
+  const columns = ['On hold', 'In progress', 'Needs review', 'Approved'];
   const [error, setError] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [items, setItems] = useState([]);
@@ -14,7 +14,7 @@ function Board() {
   const setCardsToState = (data) => {
     const cards = new Map();
 
-    data.forEach(card => {
+    data.forEach((card) => {
       if (!cards.has(card.row)) {
         cards.set(card.row, [card]);
       } else {
@@ -25,23 +25,19 @@ function Board() {
     setItems(cards);
   };
 
-  const getCards = () => {
-    axios.get("https://trello.backend.tests.nekidaem.ru/api/v1/cards/")
-      .then(response => {
-        setIsLoaded(true);
-        setCardsToState(response.data);
-      })
-      .catch(error => {
-        setIsLoaded(true);
-        setError(error);
-      });
-  };
-
   useEffect(() => {
-    getCards();
+    API.getCards()
+      .then((data) => {
+        setCardsToState(data);
+        setIsLoaded(true);
+      })
+      .catch((error) => {
+        setError(error);
+        setIsLoaded(true);
+      });
   }, []);
 
-  const addCardToState = (row, text) => {
+  const addCard = (row, text) => {
     const itemsCopy = new Map(items);
     const cardPayload = { row, text };
 
@@ -52,32 +48,18 @@ function Board() {
     }
 
     setItems(itemsCopy);
-  };
-
-  const addCard = (row, text) => {
-    addCardToState(row, text);
-
-    axios.post("https://trello.backend.tests.nekidaem.ru/api/v1/cards/", { row, text })
-      .then(response => { getCards() })
-      .catch(error => console.log(error));
-  };
-
-  const deleteCardFromState = (id, row) => {
-    const itemsCopy = new Map(items);
-
-    const column = itemsCopy.get(row);
-    const itemIndex = column.findIndex(card => card.id === id);
-    column.splice(itemIndex, 1);
-
-    setItems(itemsCopy);
+    API.addCard(row, text).catch((error) => console.log(error));
   };
 
   const deleteCard = (id, row) => {
-    deleteCardFromState(id, row);
+    const itemsCopy = new Map(items);
 
-    axios.delete(`https://trello.backend.tests.nekidaem.ru/api/v1/cards/${id}/`)
-      .then(response => { getCards() })
-      .catch(error => console.log(error));
+    const column = itemsCopy.get(row);
+    const itemIndex = column.findIndex((card) => card.id === id);
+    column.splice(itemIndex, 1);
+
+    setItems(itemsCopy);
+    API.deleteCard(id).catch((error) => console.log(error));
   };
 
   const updateCardInState = (source, destination) => {
@@ -88,7 +70,7 @@ function Board() {
     reorderedItem.row = destination.droppableId;
 
     if (!itemsCopy.get(destination.droppableId)) {
-      itemsCopy.set(destination.droppableId, [])
+      itemsCopy.set(destination.droppableId, []);
     }
     const destinationColumn = itemsCopy.get(destination.droppableId);
     destinationColumn.splice(destination.index, 0, reorderedItem);
@@ -96,55 +78,68 @@ function Board() {
     setItems(itemsCopy);
   };
 
-  const updateCard = ({ id, row, seq_num, text }) => {
-    axios.patch(`https://trello.backend.tests.nekidaem.ru/api/v1/cards/${id}/`, { row, seq_num, text })
-      .then(response => { getCards() })
-      .catch(error => console.log(error));
-  };
-
   const handleOnDragEnd = ({ source, destination, draggableId }) => {
     if (!destination) return;
 
-    if (source.droppableId === destination.droppableId && destination.index === source.index) return;
+    if (
+      source.droppableId === destination.droppableId &&
+      destination.index === source.index
+    )
+      return;
 
     const sourceColumn = items.get(source.droppableId);
-    const reorderedItem = sourceColumn.find(card => card.id === Number(draggableId));
-    const seq_num = getSeqNum(items, destination.droppableId, destination.index);
+    const reorderedItem = sourceColumn.find(
+      (card) => card.id === Number(draggableId)
+    );
+    const seq_num = getSeqNum(
+      items,
+      destination.droppableId,
+      destination.index
+    );
 
     updateCardInState(source, destination);
-    updateCard({ ...reorderedItem, row: destination.droppableId, seq_num });
+    API.updateCard(
+      reorderedItem.id,
+      destination.droppableId,
+      seq_num,
+      reorderedItem.text
+    ).catch((error) => console.log(error));
+  };
+
+  if (error) {
+    return (
+      <main className="board">
+        <p>Ошибка: {error.message}</p>
+      </main>
+    );
   }
 
-  const renderContent = () => {
-    if (error) {
-      return <p>Ошибка: {error.message}</p>;
-    } else if (!isLoaded) {
-      return <p>Загрузка...</p>;
-    } else {
-      return (
-        <DragDropContext onDragEnd={handleOnDragEnd}>
-          {columns.map((title, id) => {
-            const columnItems = items.get(id.toString());
-
-            return (
-              <Column
-                key={id}
-                id={id}
-                title={title}
-                items={columnItems}
-                addCard={addCard}
-                deleteCard={deleteCard}
-              />
-            )
-          })}
-        </DragDropContext>
-      );
-    }
-  };
+  if (!isLoaded) {
+    return (
+      <main className="board">
+        <p>Загрузка...</p>
+      </main>
+    );
+  }
 
   return (
     <main className="board">
-      {renderContent()}
+      <DragDropContext onDragEnd={handleOnDragEnd}>
+        {columns.map((title, id) => {
+          const columnItems = items.get(id.toString());
+
+          return (
+            <Column
+              key={id}
+              id={id}
+              title={title}
+              items={columnItems}
+              addCard={addCard}
+              deleteCard={deleteCard}
+            />
+          );
+        })}
+      </DragDropContext>
     </main>
   );
 }

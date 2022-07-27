@@ -1,8 +1,8 @@
-import React from "react";
-import { Droppable, Draggable } from "react-beautiful-dnd";
-import Card from "../card/Card";
-import AddCard from "../addCard/AddCard";
-import "./column.scss";
+import React from 'react';
+import { Draggable, Droppable } from 'react-beautiful-dnd';
+import AddCard from '../addCard/AddCard';
+import Card from '../card/Card';
+import './column.scss';
 
 function Column({ id, title, items = [], addCard, deleteCard }) {
   const renderCards = () => {
@@ -19,16 +19,22 @@ function Column({ id, title, items = [], addCard, deleteCard }) {
           </li>
         )}
       </Draggable>
-    ))
+    ));
   };
 
   return (
     <div className={`column column--${id}`}>
-      <div className="column__header">{title}({items.length})</div>
+      <div className="column__header">
+        {title}({items.length})
+      </div>
       <div className="column__body">
         <Droppable droppableId={`${id}`}>
           {(provided) => (
-            <ul className="column__card-list" {...provided.droppableProps} ref={provided.innerRef}>
+            <ul
+              className="column__card-list"
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+            >
               {renderCards()}
               {provided.placeholder}
             </ul>

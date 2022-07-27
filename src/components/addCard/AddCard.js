@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import "./addCard.scss";
+import React, { useState } from 'react';
+import './addCard.scss';
 
 function AddCard({ row, addCard }) {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -21,7 +21,9 @@ function AddCard({ row, addCard }) {
           required
           autoFocus
         />
-        <button className="add-card__submit" type="submit">Добавить карточку</button>
+        <button className="add-card__submit" type="submit">
+          Добавить карточку
+        </button>
         <button
           className="add-card__cancel"
           type="button"
@@ -29,14 +31,18 @@ function AddCard({ row, addCard }) {
           onClick={() => setShowAddForm(false)}
         />
       </form>
-    )
+    );
   }
 
   return (
-    <button className="add-card__btn" type="button" onClick={() => setShowAddForm(true)}>
+    <button
+      className="add-card__btn"
+      type="button"
+      onClick={() => setShowAddForm(true)}
+    >
       + Добавить карточку
     </button>
-  )
+  );
 }
 
 export default AddCard;

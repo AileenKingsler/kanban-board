@@ -1,10 +1,10 @@
-import React from "react";
-import "./header.scss"
+import React from 'react';
+import './header.scss';
 
 function Header() {
   const logout = () => {
-    localStorage.removeItem("token");
-    window.location.href = process.env.PUBLIC_URL + "/login";
+    localStorage.removeItem('token');
+    window.location.href = process.env.PUBLIC_URL + '/login';
   };
 
   return (

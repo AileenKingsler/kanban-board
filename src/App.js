@@ -1,13 +1,13 @@
-import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import HomePage from "./pages/Home";
-import LoginPage from "./pages/Login";
-import SignupPage from "./pages/Signup";
-import setAuthToken from "./helpers/setAuthToken";
-import "./style.scss";
+import React from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { setAuthToken } from './api/api';
+import HomePage from './pages/Home';
+import LoginPage from './pages/Login';
+import SignupPage from './pages/Signup';
+import './style.scss';
 
 function App() {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
 
   if (token) {
     setAuthToken(token);
@@ -16,19 +16,9 @@ function App() {
   return (
     <BrowserRouter basename="/kanban-board">
       <Routes>
-        <Route
-          exact
-          path="/"
-          element={<HomePage />}
-        />
-        <Route
-          path="/signup"
-          element={<SignupPage />}
-        />
-        <Route
-          path="/login"
-          element={<LoginPage />}
-        />
+        <Route exact path="/" element={<HomePage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/login" element={<LoginPage />} />
       </Routes>
     </BrowserRouter>
   );

@@ -1,10 +1,10 @@
-import React from "react";
-import { Navigate } from "react-router-dom";
-import Header from "../components/header/Header";
-import Board from "../components/board/Board";
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+import Board from '../components/board/Board';
+import Header from '../components/header/Header';
 
 function Home() {
-  if (localStorage.getItem("token")) {
+  if (localStorage.getItem('token')) {
     return (
       <>
         <Header />
@@ -13,9 +13,7 @@ function Home() {
     );
   }
 
-  return (
-    <Navigate to="/login" />
-  );
+  return <Navigate to="/login" />;
 }
 
 export default Home;
