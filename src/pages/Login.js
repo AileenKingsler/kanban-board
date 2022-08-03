@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { API, setAuthToken } from '../api/api';
+import { setAuthToken, usersAPI } from '../api/api';
 
 function Login() {
   const [error, setError] = useState(null);
@@ -9,7 +9,8 @@ function Login() {
     event.preventDefault();
     const [username, password] = event.target;
 
-    API.login(username.value, password.value)
+    usersAPI
+      .login(username.value, password.value)
       .then((data) => {
         const token = data.token;
 

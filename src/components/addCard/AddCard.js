@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { createCard } from '../../features/cards/cardsSlice';
 import './addCard.scss';
 
-function AddCard({ row, addCard }) {
+function AddCard({ columnId }) {
   const [showAddForm, setShowAddForm] = useState(false);
+  const dispatch = useDispatch();
 
   const handleSubmit = (event) => {
+    const text = event.target.text.value;
+
     event.preventDefault();
     setShowAddForm(false);
-    addCard(row, event.target.text.value);
+    dispatch(createCard({ columnId, text }));
   };
 
   if (showAddForm) {

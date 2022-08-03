@@ -1,7 +1,14 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
+import { deleteCard } from '../../features/cards/cardsSlice';
 import './card.scss';
 
-function Card({ id, row, text, deleteCard }) {
+function Card({ id, row, text }) {
+  const dispatch = useDispatch();
+  const deleteCardBtnHandler = (cardId, columnId) => {
+    dispatch(deleteCard({ cardId, columnId }));
+  };
+
   return (
     <div className="card">
       <p className="card__id">
@@ -12,7 +19,7 @@ function Card({ id, row, text, deleteCard }) {
         className="card__delete"
         type="button"
         aria-label={`Удалить карточку №${id}`}
-        onClick={() => deleteCard(id, row)}
+        onClick={() => deleteCardBtnHandler(id, row)}
       />
     </div>
   );

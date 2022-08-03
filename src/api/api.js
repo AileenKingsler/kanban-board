@@ -10,18 +10,14 @@ export const setAuthToken = (token) => {
   } else delete instance.defaults.headers.common['Authorization'];
 };
 
-const getCards = () => instance.get('cards/').then((response) => response.data);
+const fetchCards = () => instance.get('cards/');
 
-const addCard = (row, text) =>
-  instance.post('cards/', { row, text }).then((response) => response.data);
+const createCard = (row, text) => instance.post('cards/', { row, text });
 
-const deleteCard = (id) =>
-  instance.delete(`cards/${id}/`).then((response) => response.data);
+const deleteCard = (id) => instance.delete(`cards/${id}/`);
 
 const updateCard = (id, row, seq_num, text) =>
-  instance
-    .patch(`cards/${id}/`, { row, seq_num, text })
-    .then((response) => response.data);
+  instance.patch(`cards/${id}/`, { row, seq_num, text });
 
 const login = (username, password) =>
   instance
@@ -33,4 +29,14 @@ const signup = (username, email, password) =>
     .post('users/create/', { username, email, password })
     .then((response) => response.data);
 
-export const API = { getCards, addCard, deleteCard, updateCard, login, signup };
+export const cardsAPI = {
+  fetchCards,
+  createCard,
+  deleteCard,
+  updateCard,
+};
+
+export const usersAPI = {
+  login,
+  signup,
+};

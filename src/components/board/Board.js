@@ -1,147 +1,77 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
-import { API } from '../../api/api';
-import getSeqNum from '../../helpers/getSeqNum';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCards } from '../../features/cards/cardsSlice';
+import { moveCard } from '../../features/columns/columnsSlice';
 import Column from '../column/Column';
 import './board.scss';
 
 function Board() {
-  const columns = ['On hold', 'In progress', 'Needs review', 'Approved'];
-  const [error, setError] = useState(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [items, setItems] = useState([]);
-
-  const setCardsToState = (data) => {
-    const cards = new Map();
-
-    data.forEach((card) => {
-      if (!cards.has(card.row)) {
-        cards.set(card.row, [card]);
-      } else {
-        cards.get(card.row).push(card);
-      }
-    });
-
-    setItems(cards);
-  };
+  const columns = useSelector((state) => state.columns);
+  const cards = useSelector((state) => state.cards.entities);
+  const cardsStatus = useSelector((state) => state.cards.status);
+  const cardsError = useSelector((state) => state.cards.error);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    API.getCards()
-      .then((data) => {
-        setCardsToState(data);
-        setIsLoaded(true);
-      })
-      .catch((error) => {
-        setError(error);
-        setIsLoaded(true);
-      });
-  }, []);
-
-  const addCard = (row, text) => {
-    const itemsCopy = new Map(items);
-    const cardPayload = { row, text };
-
-    if (!itemsCopy.has(row)) {
-      itemsCopy.set(row, [cardPayload]);
-    } else {
-      itemsCopy.get(row).push(cardPayload);
+    if (cardsStatus === 'idle') {
+      dispatch(fetchCards());
     }
-
-    setItems(itemsCopy);
-    API.addCard(row, text).catch((error) => console.log(error));
-  };
-
-  const deleteCard = (id, row) => {
-    const itemsCopy = new Map(items);
-
-    const column = itemsCopy.get(row);
-    const itemIndex = column.findIndex((card) => card.id === id);
-    column.splice(itemIndex, 1);
-
-    setItems(itemsCopy);
-    API.deleteCard(id).catch((error) => console.log(error));
-  };
-
-  const updateCardInState = (source, destination) => {
-    const itemsCopy = new Map(items);
-
-    const sourceColumn = itemsCopy.get(source.droppableId);
-    const [reorderedItem] = sourceColumn.splice(source.index, 1);
-    reorderedItem.row = destination.droppableId;
-
-    if (!itemsCopy.get(destination.droppableId)) {
-      itemsCopy.set(destination.droppableId, []);
-    }
-    const destinationColumn = itemsCopy.get(destination.droppableId);
-    destinationColumn.splice(destination.index, 0, reorderedItem);
-
-    setItems(itemsCopy);
-  };
+  }, [cardsStatus, dispatch]);
 
   const handleOnDragEnd = ({ source, destination, draggableId }) => {
     if (!destination) return;
 
+    const { droppableId: sourceColumnId, index: sourceIndex } = source;
+    const { droppableId: destinationColumnId, index: destinationIndex } =
+      destination;
+
     if (
-      source.droppableId === destination.droppableId &&
-      destination.index === source.index
+      sourceColumnId === destinationColumnId &&
+      sourceIndex === destinationIndex
     )
       return;
 
-    const sourceColumn = items.get(source.droppableId);
-    const reorderedItem = sourceColumn.find(
-      (card) => card.id === Number(draggableId)
-    );
-    const seq_num = getSeqNum(
-      items,
-      destination.droppableId,
-      destination.index
-    );
-
-    updateCardInState(source, destination);
-    API.updateCard(
-      reorderedItem.id,
-      destination.droppableId,
-      seq_num,
-      reorderedItem.text
-    ).catch((error) => console.log(error));
+    dispatch(
+      moveCard({
+        cardId: draggableId,
+        sourceColumnId,
+        destinationColumnId,
+        destinationIndex,
+        text: cards[draggableId].text,
+      })
+    ).then(() => {
+      dispatch(fetchCards());
+    });
   };
 
-  if (error) {
-    return (
-      <main className="board">
-        <p>Ошибка: {error.message}</p>
-      </main>
-    );
-  }
+  let content;
 
-  if (!isLoaded) {
-    return (
-      <main className="board">
-        <p>Загрузка...</p>
-      </main>
-    );
-  }
-
-  return (
-    <main className="board">
+  if (cardsStatus === 'failed') {
+    content = <p>{cardsError}</p>;
+  } else if (cardsStatus === 'succeeded') {
+    content = (
       <DragDropContext onDragEnd={handleOnDragEnd}>
-        {columns.map((title, id) => {
-          const columnItems = items.get(id.toString());
+        {Object.keys(columns).map((id, index) => {
+          const columnTitle = columns[id].title;
+          const columnCards = columns[id].cardIds.map(
+            (cardId) => cards[cardId]
+          );
 
           return (
             <Column
-              key={id}
-              id={id}
-              title={title}
-              items={columnItems}
-              addCard={addCard}
-              deleteCard={deleteCard}
+              key={index}
+              id={index}
+              title={columnTitle}
+              cards={columnCards}
             />
           );
         })}
       </DragDropContext>
-    </main>
-  );
+    );
+  }
+
+  return <main className="board">{content}</main>;
 }
 
 export default Board;

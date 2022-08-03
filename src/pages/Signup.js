@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { API, setAuthToken } from '../api/api';
+import { setAuthToken, usersAPI } from '../api/api';
 
 function Signup() {
   const [error, setError] = useState(null);
@@ -9,7 +9,8 @@ function Signup() {
     event.preventDefault();
     const [username, email, password] = event.target;
 
-    API.signup(username.value, email.value, password.value)
+    usersAPI
+      .signup(username.value, email.value, password.value)
       .then((data) => {
         const token = data.token;
 

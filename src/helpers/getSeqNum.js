@@ -1,17 +1,20 @@
-const getSeqNum = (cards, columnId, destinationIndex) => {
-  const destinationColumn = cards.get(columnId);
-
-  if (!destinationColumn) {
+export const getSeqNum = (
+  cards,
+  destinationColumnCardIds,
+  destinationIndex
+) => {
+  if (!destinationColumnCardIds.length) {
     return 0;
   }
 
-  const destinationCard = destinationColumn[destinationIndex];
+  const destinationCardId = destinationColumnCardIds[destinationIndex];
 
-  if (!destinationCard) {
-    return destinationColumn[destinationIndex - 1].seq_num + 1;
+  if (!destinationCardId) {
+    const destinationPrevCardId =
+      destinationColumnCardIds[destinationIndex - 1];
+
+    return cards[destinationPrevCardId].seq_num + 1;
   }
 
-  return destinationCard.seq_num;
+  return cards[destinationCardId].seq_num;
 };
-
-export default getSeqNum;
